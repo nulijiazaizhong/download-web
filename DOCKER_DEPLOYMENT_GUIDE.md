@@ -1,6 +1,6 @@
 # Docker 部署指南 - 下载站服务
 
-本文档提供了使用 Docker 和 Docker Compose 部署下载站服务的详细步骤。
+本文档提供了使用 Docker 和 Docker Compose 部署下载站服务的详细步骤。本服务使用文件系统存储数据，无需数据库。
 
 ## 部署前提
 
@@ -19,6 +19,7 @@
 - `Dockerfile.frontend`: 前端服务的 Docker 构建文件
 - `docker-compose.yml`: 定义和编排所有服务的配置文件
 - `nginx.conf`: Nginx 配置文件，用于前端服务和 API 代理
+- `backend/config/fileStorage.js`: 文件系统存储模块，用于替代数据库存储数据
 
 ## 部署步骤
 
@@ -40,8 +41,8 @@ vim docker-compose.yml
 ```
 
 主要配置项：
-- MySQL 数据库凭据
 - JWT 密钥
+- 存储路径配置
 - 其他应用特定配置
 
 ### 3. 构建和启动服务
@@ -56,6 +57,7 @@ docker-compose up -d
 2. 构建应用镜像
 3. 创建并启动所有容器
 4. 设置网络和数据卷
+5. 初始化文件存储系统
 
 ### 4. 验证部署
 
@@ -80,7 +82,6 @@ docker-compose logs
 # 查看特定服务的日志
 docker-compose logs backend
 docker-compose logs frontend
-docker-compose logs mysql
 ```
 
 ### 重启服务
@@ -106,8 +107,10 @@ docker-compose up -d --build
 ### 数据备份
 
 ```bash
-# 备份 MySQL 数据
-docker exec download-web-mysql mysqldump -u your_username -pyour_secure_password download_web > backup-$(date +%Y%m%d).sql
+# 备份数据文件
+docker cp download-web-backend:/app/data ./backup-data-$(date +%Y%m%d)
+# 备份上传文件
+docker cp download-web-backend:/app/uploads ./backup-uploads-$(date +%Y%m%d)
 ```
 
 ## 故障排除
@@ -118,11 +121,11 @@ docker exec download-web-mysql mysqldump -u your_username -pyour_secure_password
 2. 确认端口是否被占用：`netstat -tuln`
 3. 检查磁盘空间：`df -h`
 
-### 数据库连接问题
+### 数据存储问题
 
-1. 确认 MySQL 容器运行状态：`docker-compose ps mysql`
-2. 检查数据库日志：`docker-compose logs mysql`
-3. 尝试手动连接数据库：`docker exec -it download-web-mysql mysql -u your_username -p`
+1. 检查数据目录权限：`docker exec download-web-backend ls -la /app/data`
+2. 确认数据文件存在：`docker exec download-web-backend ls -la /app/data/users`
+3. 检查日志中的存储错误：`docker-compose logs backend | grep "Error"` 
 
 ### 前端无法访问后端 API
 

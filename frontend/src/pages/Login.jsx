@@ -3,7 +3,7 @@ import { Form, Input, Button, Card, message, Typography } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { AuthContext } from '../context/AuthContext';
+import AuthContext from '../context/AuthContext';
 
 const { Title } = Typography;
 

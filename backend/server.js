@@ -6,6 +6,10 @@ const dotenv = require('dotenv');
 // 加载环境变量
 dotenv.config();
 
+// 初始化文件存储系统
+const { initStorage } = require('./config/fileStorage');
+initStorage();
+
 // 初始化Express应用
 const app = express();
 
@@ -16,6 +20,10 @@ app.use(express.urlencoded({ extended: true }));
 
 // 静态文件服务
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+
+// 使用文件系统模型替代数据库模型
+const models = require('./models/FileSystemModels');
+global.models = models;
 
 // 导入路由
 const fileRoutes = require('./routes/fileRoutes');

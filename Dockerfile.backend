@@ -9,11 +9,15 @@ COPY package*.json ./
 # 安装依赖
 RUN npm install --production
 
+# 安装uuid包（用于文件存储系统）
+RUN npm install uuid
+
 # 复制应用代码
 COPY . .
 
-# 创建上传目录
-RUN mkdir -p uploads && chmod -R 755 uploads
+# 创建上传目录和数据存储目录
+RUN mkdir -p uploads && chmod -R 755 uploads \
+    && mkdir -p data/users data/categories data/files && chmod -R 755 data
 
 # 暴露端口
 EXPOSE 5000
